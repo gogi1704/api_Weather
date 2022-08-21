@@ -9,11 +9,22 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
+import com.example.api_weather.adapters.VpAdapter
 import com.example.api_weather.databinding.FragmentMainBinding
+import com.google.android.material.tabs.TabLayoutMediator
 
 class MainFragment : Fragment() {
-    lateinit var binding: FragmentMainBinding
-    lateinit var pLauncher: ActivityResultLauncher<String>
+    private val listFragments = listOf(
+        HoursFragment(),
+        DaysFragment()
+    )
+    private val tabList = listOf(
+        "HOURS",
+        "DAYS"
+    )
+    private lateinit var binding: FragmentMainBinding
+    private lateinit var pLauncher: ActivityResultLauncher<String>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +37,15 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         checkPermission()
+        init()
+    }
+
+    private fun init() = with(binding){
+        val vPAdapter = VpAdapter(activity as FragmentActivity , listFragments)
+        viewPager.adapter = vPAdapter
+        TabLayoutMediator(tabLayout , viewPager){
+            tab , position -> tab.text = tabList[position]
+        }.attach()
     }
 
 
