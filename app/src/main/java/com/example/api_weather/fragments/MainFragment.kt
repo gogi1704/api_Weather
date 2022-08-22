@@ -2,6 +2,7 @@ package com.example.api_weather.fragments
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,19 +11,22 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.example.api_weather.KEY
 import com.example.api_weather.adapters.VpAdapter
+import com.example.api_weather.apiService.ApiServiceImpl
 import com.example.api_weather.databinding.FragmentMainBinding
+import com.example.api_weather.model.WeatherModel
 import com.google.android.material.tabs.TabLayoutMediator
+import org.json.JSONObject
 
 class MainFragment : Fragment() {
-    private val listFragments = listOf(
-        HoursFragment(),
-        DaysFragment()
-    )
-    private val tabList = listOf(
-        "HOURS",
-        "DAYS"
-    )
+    private val weatherApi = ApiServiceImpl()
+    private val listFragments = listOf(HoursFragment(), DaysFragment())
+    private val tabList = listOf("HOURS", "DAYS")
+
     private lateinit var binding: FragmentMainBinding
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
@@ -38,20 +42,16 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         checkPermission()
         init()
+        weatherApi.requestWeatherData(view.context, "Rostov")
     }
 
-    private fun init() = with(binding){
-        val vPAdapter = VpAdapter(activity as FragmentActivity , listFragments)
+    private fun init() = with(binding) {
+        val vPAdapter = VpAdapter(activity as FragmentActivity, listFragments)
         viewPager.adapter = vPAdapter
-        TabLayoutMediator(tabLayout , viewPager){
-            tab , position -> tab.text = tabList[position]
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = tabList[position]
         }.attach()
     }
-
-
-
-
-
 
     private fun permissionListener() {
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {

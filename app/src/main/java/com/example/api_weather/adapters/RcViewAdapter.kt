@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.api_weather.R
 import com.example.api_weather.databinding.ItemLayoutBinding
-import com.example.api_weather.model.DayItemWeatherModel
+import com.example.api_weather.model.WeatherModel
 
 class RcViewAdapter :
-    ListAdapter<DayItemWeatherModel, RcViewAdapter.WeatherViewHolder>(Comparator()) {
+    ListAdapter<WeatherModel, RcViewAdapter.WeatherViewHolder>(Comparator()) {
 
     class WeatherViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding = ItemLayoutBinding.bind(view)
-        fun bind(item: DayItemWeatherModel) {
+        fun bind(item: WeatherModel) {
             with(binding) {
                 textViewDate.text = item.date
                 textViewCondition.text = item.condition
@@ -35,18 +35,18 @@ class RcViewAdapter :
 }
 
 
-class Comparator() : DiffUtil.ItemCallback<DayItemWeatherModel>() {
+class Comparator() : DiffUtil.ItemCallback<WeatherModel>() {
     override fun areItemsTheSame(
-        oldItem: DayItemWeatherModel,
-        newItem: DayItemWeatherModel
+        oldItem: WeatherModel,
+        newItem: WeatherModel
     ): Boolean {
         return oldItem == newItem
     }
 
 
     override fun areContentsTheSame(
-        oldItem: DayItemWeatherModel,
-        newItem: DayItemWeatherModel
+        oldItem: WeatherModel,
+        newItem: WeatherModel
     ): Boolean {
         return oldItem == newItem
     }
