@@ -6,7 +6,7 @@ import org.json.JSONObject
 
 interface ApiService {
     fun parseWeather(result: String)
-    fun parseCurrentData(mainJsonObject: JSONObject , weatherItem:WeatherModel)
+    fun parseCurrentData(mainJsonObject: JSONObject , weatherItem:WeatherModel):WeatherModel
     fun parseDays(mainJsonObject: JSONObject):List<WeatherModel>
     fun requestWeatherData(context: Context,city: String)
 

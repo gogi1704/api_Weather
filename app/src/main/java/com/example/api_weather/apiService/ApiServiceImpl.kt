@@ -2,6 +2,8 @@ package com.example.api_weather.apiService
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -9,17 +11,40 @@ import com.example.api_weather.KEY
 import com.example.api_weather.model.WeatherModel
 import org.json.JSONObject
 
-class ApiServiceImpl : ApiService {
+class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiService {
+
+    var emptyDay = WeatherModel(
+        city = "",
+        date = "",
+        condition = "",
+        imageUrl = "",
+        currentTemp = "",
+        maxTemp = "",
+        minTemp = "",
+        hours = ""
+    )
+        set(value) {
+            field = value
+            liveData.value = field
+        }
+
 
     override fun parseWeather(result: String) {
         val jsonResult = JSONObject(result)
         val listDays = parseDays(jsonResult)
         parseCurrentData(jsonResult, listDays[0])
+        Log.d(
+            "My log", "ParseWeather $emptyDay"
+        )
 
     }
 
-    override fun parseCurrentData(mainJsonObject: JSONObject, weatherItem: WeatherModel) {
-        val item = WeatherModel(
+
+    override fun parseCurrentData(
+        mainJsonObject: JSONObject,
+        weatherItem: WeatherModel
+    ): WeatherModel {
+        emptyDay = emptyDay.copy(
             city = mainJsonObject.getJSONObject("location").getString("name"),
             date = mainJsonObject.getJSONObject("current").getString("last_updated"),
             condition = mainJsonObject.getJSONObject("current").getJSONObject("condition")
@@ -31,9 +56,7 @@ class ApiServiceImpl : ApiService {
             minTemp = weatherItem.minTemp,
             hours = weatherItem.hours
         )
-        Log.d("My log", item.minTemp)
-        Log.d("My log", item.maxTemp)
-        Log.d("My log", item.hours)
+        return emptyDay
     }
 
     override fun parseDays(mainJsonObject: JSONObject): List<WeatherModel> {
@@ -61,7 +84,7 @@ class ApiServiceImpl : ApiService {
         return listDays
     }
 
-    override fun requestWeatherData(context:Context,city: String) {
+    override fun requestWeatherData(context: Context, city: String) {
         val url =
             "https://api.weatherapi.com/v1/forecast.json?key=$KEY&q=$city&days=3&aqi=no&alerts=no"
         val queue = Volley.newRequestQueue(context)
@@ -70,7 +93,6 @@ class ApiServiceImpl : ApiService {
             url,
             { result ->
                 parseWeather(result)
-
             },
             { error ->
                 Log.d(
