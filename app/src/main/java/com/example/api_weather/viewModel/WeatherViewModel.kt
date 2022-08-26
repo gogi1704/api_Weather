@@ -21,6 +21,7 @@ import org.json.JSONObject
 
 class WeatherViewModel() : ViewModel() {
 
+
     val mainLivedata = MutableLiveData<WeatherModel>()
     val listLivedata = MutableLiveData<List<WeatherModel>>()
     val weatherService = ApiServiceImpl(mainLivedata)

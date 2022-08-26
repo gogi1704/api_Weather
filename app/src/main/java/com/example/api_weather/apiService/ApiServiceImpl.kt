@@ -104,4 +104,6 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
         )
         queue.add(request)
     }
+
+    fun requestDaysData(){}
 }

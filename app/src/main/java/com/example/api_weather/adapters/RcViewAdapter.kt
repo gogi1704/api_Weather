@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.api_weather.R
 import com.example.api_weather.databinding.ItemLayoutBinding
 import com.example.api_weather.model.WeatherModel
+import com.squareup.picasso.Picasso
 
 class RcViewAdapter :
     ListAdapter<WeatherModel, RcViewAdapter.WeatherViewHolder>(Comparator()) {
@@ -19,7 +20,8 @@ class RcViewAdapter :
             with(binding) {
                 textViewDate.text = item.date
                 textViewCondition.text = item.condition
-                textViewTemp.text = item.currentTemp
+                textViewTemp.text = "${item.currentTemp}°C"
+                Picasso.get().load("https:${item.imageUrl}").into(imageViewCondition)
             }
         }
     }
