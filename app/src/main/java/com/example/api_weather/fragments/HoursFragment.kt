@@ -1,22 +1,20 @@
 package com.example.api_weather.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import com.example.api_weather.adapters.RcViewAdapter
+import com.example.api_weather.adapters.RcViewHoursAdapter
 import com.example.api_weather.databinding.FragmentHoursBinding
 import com.example.api_weather.model.WeatherModel
 import com.example.api_weather.viewModel.WeatherViewModel
-import com.squareup.picasso.Picasso
 import org.json.JSONArray
 import org.json.JSONObject
 
 class HoursFragment : Fragment() {
-    private lateinit var adapter: RcViewAdapter
+    private lateinit var adapter: RcViewHoursAdapter
     private lateinit var binding: FragmentHoursBinding
     private val viewModel: WeatherViewModel by activityViewModels()
 
@@ -40,13 +38,13 @@ class HoursFragment : Fragment() {
 
 
     private fun initRcView() = with(binding) {
-        adapter = RcViewAdapter()
+        adapter = RcViewHoursAdapter()
         rV.adapter = adapter
     }
 
     private fun parseHours(dayItem: WeatherModel): ArrayList<WeatherModel> {
         val listParseHours = ArrayList<WeatherModel>()
-        if (dayItem.city != "") {
+        if (dayItem.city != "Searching") {
             val jsonArrayHours = JSONArray(dayItem.hours)
             for (i in 0 until jsonArrayHours.length() step 2) {
                 val parsDay = WeatherModel(

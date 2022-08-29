@@ -1,24 +1,26 @@
 package com.example.api_weather.fragments
 
 import android.Manifest
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
+import com.example.api_weather.AndroidUtils
 import com.example.api_weather.adapters.VpAdapter
-import com.example.api_weather.apiService.ApiServiceImpl
 import com.example.api_weather.databinding.FragmentMainBinding
 import com.example.api_weather.viewModel.WeatherViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
-import kotlin.concurrent.thread
+
 
 class MainFragment : Fragment() {
 
@@ -45,13 +47,34 @@ class MainFragment : Fragment() {
         viewModel.mainLivedata.value = viewModel.weatherService.emptyDay
         init()
         cardObserv()
+        with(binding) {
+            var searchFlag = false
+            binding.imageButtonSync.setOnClickListener {
+                viewModel.weatherService.requestWeatherData(view.context, "Sydney")
+            }
 
-        binding.imageButtonSync.setOnClickListener {
-            viewModel.weatherService.requestWeatherData(view.context, "Sydney")
-
+            binding.imageButtonSearch.setOnClickListener() {
+                if (!searchFlag) {
+                    editTextSearch.text = null
+                    editTextSearch.visibility = View.VISIBLE
+                    AndroidUtils.showKeyboard(it)
+                    editTextSearch.requestFocus()
+                    searchFlag = true
+                } else{
+                    if (editTextSearch.text != null){
+                        searchCity(view.context , editTextSearch.text.toString())
+                    }
+                    editTextSearch.visibility = View.GONE
+                    AndroidUtils.hideKeyboard(it)
+                    searchFlag = false
+                }
+            }
         }
 
+    }
 
+    private fun searchCity( context: Context,city:String ){
+        viewModel.weatherService.requestWeatherData(context , city)
     }
 
     private fun init() = with(binding) {

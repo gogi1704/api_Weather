@@ -11,13 +11,14 @@ import com.example.api_weather.databinding.ItemLayoutBinding
 import com.example.api_weather.model.WeatherModel
 import com.squareup.picasso.Picasso
 
-class RcViewAdapter :
-    ListAdapter<WeatherModel, RcViewAdapter.WeatherViewHolder>(Comparator()) {
+class RcViewHoursAdapter :
+    ListAdapter<WeatherModel, RcViewHoursAdapter.WeatherViewHolder>(ComparatorHours) {
 
     class WeatherViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding = ItemLayoutBinding.bind(view)
         fun bind(item: WeatherModel) {
             with(binding) {
+
                 textViewDate.text = item.date
                 textViewCondition.text = item.condition
                 textViewTemp.text = "${item.currentTemp}°C"
@@ -37,7 +38,7 @@ class RcViewAdapter :
 }
 
 
-class Comparator() : DiffUtil.ItemCallback<WeatherModel>() {
+object ComparatorHours : DiffUtil.ItemCallback<WeatherModel>() {
     override fun areItemsTheSame(
         oldItem: WeatherModel,
         newItem: WeatherModel

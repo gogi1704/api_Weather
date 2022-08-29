@@ -11,10 +11,13 @@ import com.example.api_weather.KEY
 import com.example.api_weather.model.WeatherModel
 import org.json.JSONObject
 
-class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiService {
+class ApiServiceImpl(
+    private val dayLiveData: MutableLiveData<WeatherModel>,
+    private val listLiveData: MutableLiveData<List<WeatherModel>>
+) : ApiService {
 
     var emptyDay = WeatherModel(
-        city = "",
+        city = "Searching",
         date = "",
         condition = "",
         imageUrl = "",
@@ -25,7 +28,13 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
     )
         set(value) {
             field = value
-            liveData.value = field
+            dayLiveData.value = field
+        }
+
+    var listDays = ArrayList<WeatherModel>()
+        set(value) {
+            field = value
+            listLiveData.value = field
         }
 
 
@@ -33,9 +42,7 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
         val jsonResult = JSONObject(result)
         val listDays = parseDays(jsonResult)
         parseCurrentData(jsonResult, listDays[0])
-        Log.d(
-            "My log", "ParseWeather $emptyDay"
-        )
+
 
     }
 
@@ -60,7 +67,7 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
     }
 
     override fun parseDays(mainJsonObject: JSONObject): List<WeatherModel> {
-        val listDays = ArrayList<WeatherModel>()
+            val list = ArrayList<WeatherModel>()
         val daysArray = mainJsonObject.getJSONObject("forecast")
             .getJSONArray("forecastday")
 
@@ -78,9 +85,11 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
                 minTemp = forecastDay.getJSONObject("day").getString("mintemp_c"),
                 hours = forecastDay.getJSONArray("hour").toString()
             )
-            listDays.add(dayItem)
-
+           list.add(dayItem)
+            println(dayItem)
         }
+
+        listDays = list
         return listDays
     }
 
@@ -95,6 +104,7 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
                 parseWeather(result)
             },
             { error ->
+                Toast.makeText(context ,"Data entered incorrectly" ,Toast.LENGTH_SHORT).show()
                 Log.d(
                     "My log", "error" +
                             " $error"
@@ -105,5 +115,5 @@ class ApiServiceImpl(private val liveData: MutableLiveData<WeatherModel>) : ApiS
         queue.add(request)
     }
 
-    fun requestDaysData(){}
+
 }

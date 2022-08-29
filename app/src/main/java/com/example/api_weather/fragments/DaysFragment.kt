@@ -6,28 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import com.example.api_weather.adapters.RcViewAdapter
+import com.example.api_weather.adapters.RcViewDaysAdapter
+import com.example.api_weather.adapters.RcViewHoursAdapter
 import com.example.api_weather.databinding.FragmentDaysBinding
-import com.example.api_weather.model.WeatherModel
 import com.example.api_weather.viewModel.WeatherViewModel
 
-
-val list = listOf<WeatherModel>(
-    WeatherModel("", "", "", "", "", "", "", ""),
-    WeatherModel("", "", "", "", "", "", "", ""),
-    WeatherModel("","","","","","","","", )
-)
-
 class DaysFragment : Fragment() {
-    private lateinit var adapter: RcViewAdapter
+    private lateinit var adapter: RcViewDaysAdapter
     private lateinit var binding: FragmentDaysBinding
-    val viewModel:WeatherViewModel by activityViewModels()
+    private val viewModel: WeatherViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        adapter = RcViewAdapter()
+        adapter = RcViewDaysAdapter()
         binding = FragmentDaysBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -36,16 +29,21 @@ class DaysFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
 
+        viewModel.listLivedata.observe(viewLifecycleOwner) {
+            adapter.submitList(it)
+        }
     }
 
 
     private fun initRecyclerView() {
         with(binding) {
             rV.adapter = adapter
-            adapter.submitList(list)
+            adapter.submitList(viewModel.listLivedata.value)
 
         }
     }
+
+    private fun parseDays() {}
 
 
     companion object {
