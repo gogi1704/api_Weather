@@ -86,7 +86,6 @@ class ApiServiceImpl(
                 hours = forecastDay.getJSONArray("hour").toString()
             )
            list.add(dayItem)
-            println(dayItem)
         }
 
         listDays = list

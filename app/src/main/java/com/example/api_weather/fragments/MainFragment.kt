@@ -1,16 +1,15 @@
 package com.example.api_weather.fragments
 
 import android.Manifest
-import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
@@ -18,15 +17,16 @@ import com.example.api_weather.AndroidUtils
 import com.example.api_weather.adapters.VpAdapter
 import com.example.api_weather.databinding.FragmentMainBinding
 import com.example.api_weather.viewModel.WeatherViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 
 
 class MainFragment : Fragment() {
-
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val listFragments = listOf(HoursFragment(), DaysFragment())
     private val tabList = listOf("HOURS", "DAYS")
-
     private lateinit var binding: FragmentMainBinding
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -35,22 +35,28 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         binding = FragmentMainBinding.inflate(layoutInflater, container, false)
+
         return binding.root
 
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         checkPermission()
-        viewModel.weatherService.requestWeatherData(view.context, "Donetsk")
         viewModel.mainLivedata.value = viewModel.weatherService.emptyDay
         init()
         cardObserv()
+        viewModel.getLocation(requireContext(), fusedLocationClient)
+
+//onClicks
         with(binding) {
             var searchFlag = false
             binding.imageButtonSync.setOnClickListener {
-                viewModel.weatherService.requestWeatherData(view.context, "Sydney")
+                viewModel.getLocation(requireContext(), fusedLocationClient)
             }
 
             binding.imageButtonSearch.setOnClickListener() {
@@ -60,9 +66,9 @@ class MainFragment : Fragment() {
                     AndroidUtils.showKeyboard(it)
                     editTextSearch.requestFocus()
                     searchFlag = true
-                } else{
-                    if (editTextSearch.text != null){
-                        searchCity(view.context , editTextSearch.text.toString())
+                } else {
+                    if (editTextSearch.text != null) {
+                        viewModel.searchCity(view.context, editTextSearch.text.toString())
                     }
                     editTextSearch.visibility = View.GONE
                     AndroidUtils.hideKeyboard(it)
@@ -73,11 +79,9 @@ class MainFragment : Fragment() {
 
     }
 
-    private fun searchCity( context: Context,city:String ){
-        viewModel.weatherService.requestWeatherData(context , city)
-    }
 
     private fun init() = with(binding) {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val vPAdapter = VpAdapter(activity as FragmentActivity, listFragments)
         viewPager.adapter = vPAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
@@ -85,6 +89,9 @@ class MainFragment : Fragment() {
         }.attach()
 
     }
+
+
+
 
     private fun cardObserv() {
         with(binding) {
@@ -112,6 +119,11 @@ class MainFragment : Fragment() {
             permissionListener()
             pLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
+        if (!isPermissionsGranted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            permissionListener()
+            pLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
     }
 
     companion object {
