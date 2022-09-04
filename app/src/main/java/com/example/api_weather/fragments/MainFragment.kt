@@ -1,11 +1,14 @@
 package com.example.api_weather.fragments
 
 import android.Manifest
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,11 +34,20 @@ class MainFragment : Fragment() {
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private val viewModel: WeatherViewModel by activityViewModels()
 
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+            viewModel.getLocation(requireContext(), fusedLocationClient)
+
+        viewModel.mainLivedata.value = viewModel.weatherService.emptyDay
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentMainBinding.inflate(layoutInflater, container, false)
 
         return binding.root
@@ -46,11 +58,10 @@ class MainFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        checkPermission()
-        viewModel.mainLivedata.value = viewModel.weatherService.emptyDay
-        init()
         cardObserv()
-        viewModel.getLocation(requireContext(), fusedLocationClient)
+        checkPermission()
+        init()
+
 
 //onClicks
         with(binding) {
@@ -67,9 +78,7 @@ class MainFragment : Fragment() {
                     editTextSearch.requestFocus()
                     searchFlag = true
                 } else {
-                    if (editTextSearch.text != null) {
-                        viewModel.searchCity(view.context, editTextSearch.text.toString())
-                    }
+                    viewModel.searchCity(view.context, editTextSearch.text.toString())
                     editTextSearch.visibility = View.GONE
                     AndroidUtils.hideKeyboard(it)
                     searchFlag = false
@@ -81,21 +90,26 @@ class MainFragment : Fragment() {
 
 
     private fun init() = with(binding) {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val vPAdapter = VpAdapter(activity as FragmentActivity, listFragments)
         viewPager.adapter = vPAdapter
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = tabList[position]
         }.attach()
-
+        with(binding) {
+            textViewCity.visibility = View.GONE
+            textViewTempToday.visibility = View.GONE
+        }
     }
-
-
 
 
     private fun cardObserv() {
         with(binding) {
             viewModel.mainLivedata.observe(viewLifecycleOwner) {
+                if (viewModel.mainLivedata.value?.city != "Searching") {
+                    textViewCity.visibility = View.VISIBLE
+                    textViewTempToday.visibility = View.VISIBLE
+                    progressBar.visibility = ProgressBar.INVISIBLE
+                }
                 textViewMainCardDate.text = it.date
                 textViewCity.text = it.city
                 textViewTempToday.text = it.currentTemp

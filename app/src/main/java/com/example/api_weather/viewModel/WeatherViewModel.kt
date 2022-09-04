@@ -27,6 +27,7 @@ class WeatherViewModel() : ViewModel() {
 
 
 
+
     @RequiresApi(Build.VERSION_CODES.S)
     fun getLocation(context: Context, fusedLocationClient :FusedLocationProviderClient) {
         val token = CancellationTokenSource()
